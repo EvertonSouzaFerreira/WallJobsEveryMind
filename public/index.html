@@ -9,6 +9,8 @@
   <body>
     <h1>Lista de Produtos</h1>
 
+    <ul id="productList"></ul>
+
     <h2>Adicionar Novo Produto</h2>
 
     <form id="productForm">
@@ -27,8 +29,6 @@
       <button type="button" onclick="addProduct()">Adicionar Produto</button>
     </form>
 
-    <ul id="productList"></ul>
-
     <script>
       async function fetchAndDisplayProducts() {
         try {
@@ -44,9 +44,15 @@
             // Adiciona cada produto à lista
             data.products.forEach((product) => {
               const listItem = document.createElement("li");
-              listItem.textContent = `${product.nome} - Código: ${
+
+              // Conteúdo do item da lista
+              listItem.innerHTML = `
+              ${product.nome} - Código: ${
                 product.codigo
-              }, Preço: ${product.preco.toFixed(2)}`;
+              }, Preço: ${product.preco.toFixed(2)}
+              <button onclick="deleteProduct('${product._id}')">Deletar</button>
+            `;
+
               productList.appendChild(listItem);
             });
           } else {
@@ -76,6 +82,27 @@
 
         // Atualiza a lista de produtos após adicionar um novo
         fetchAndDisplayProducts();
+      }
+
+      async function deleteProduct(productId) {
+        const confirmed = confirm(
+          "Tem certeza que deseja deletar este produto?"
+        );
+
+        if (confirmed) {
+          const response = await fetch(
+            `http://localhost:3000/products/${productId}`,
+            {
+              method: "DELETE",
+            }
+          );
+
+          const data = await response.json();
+          console.log(data);
+
+          // Atualiza a lista de produtos após deletar um produto
+          fetchAndDisplayProducts();
+        }
       }
 
       // Chama a função ao carregar a página
