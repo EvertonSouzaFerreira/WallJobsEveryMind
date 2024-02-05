@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Produtos</title>
+  </head>
+  <body>
+    <h1>Lista de Produtos</h1>
+
+    <h2>Adicionar Novo Produto</h2>
+
+    <form id="productForm">
+      <label for="nome">Nome:</label>
+      <input type="text" id="nome" name="nome" required />
+
+      <label for="codigo">Código:</label>
+      <input type="text" id="codigo" name="codigo" required />
+
+      <label for="descricao">Descrição:</label>
+      <textarea id="descricao" name="descricao" required></textarea>
+
+      <label for="preco">Preço:</label>
+      <input type="number" id="preco" name="preco" step="0.01" required />
+
+      <button type="button" onclick="addProduct()">Adicionar Produto</button>
+    </form>
+
+    <ul id="productList"></ul>
+
+    <script>
+      async function fetchAndDisplayProducts() {
+        try {
+          const response = await fetch("http://localhost:3000/products");
+          const data = await response.json();
+
+          if (response.ok) {
+            const productList = document.getElementById("productList");
+
+            // Limpa a lista existente
+            productList.innerHTML = "";
+
+            // Adiciona cada produto à lista
+            data.products.forEach((product) => {
+              const listItem = document.createElement("li");
+              listItem.textContent = `${product.nome} - Código: ${
+                product.codigo
+              }, Preço: ${product.preco.toFixed(2)}`;
+              productList.appendChild(listItem);
+            });
+          } else {
+            console.error("Erro ao buscar produtos:", data);
+          }
+        } catch (error) {
+          console.error("Erro na requisição:", error);
+        }
+      }
+
+      async function addProduct() {
+        const nome = document.getElementById("nome").value;
+        const codigo = document.getElementById("codigo").value;
+        const descricao = document.getElementById("descricao").value;
+        const preco = parseFloat(document.getElementById("preco").value);
+
+        const response = await fetch("http://localhost:3000/products", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ nome, codigo, descricao, preco }),
+        });
+
+        const data = await response.json();
+        console.log(data);
+
+        // Atualiza a lista de produtos após adicionar um novo
+        fetchAndDisplayProducts();
+      }
+
+      // Chama a função ao carregar a página
+      window.onload = fetchAndDisplayProducts;
+    </script>
+  </body>
+</html>
